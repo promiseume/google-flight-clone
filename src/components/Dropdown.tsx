@@ -38,18 +38,20 @@ export default function FlightHeader() {
   };
 
   return (
-    <div className="flex gap-3 mt-6 ml-4">
-      <DropDownWrapper
-        value={tripType}
-        setValue={handleTripTypeChange}
-        options={TripType}
-      />
-      <PassengerDropdown />
-      <DropDownWrapper
-        value={tripClass}
-        setValue={handleTripClassChange}
-        options={TripClass}
-      />
+    <div className="p-4 max-w-4xl mx-auto">
+      <div className="flex gap-3 mt-6 ml-4">
+        <DropDownWrapper
+          value={tripType}
+          setValue={handleTripTypeChange}
+          options={TripType}
+        />
+        <PassengerDropdown />
+        <DropDownWrapper
+          value={tripClass}
+          setValue={handleTripClassChange}
+          options={TripClass}
+        />
+      </div>
     </div>
   );
 }
