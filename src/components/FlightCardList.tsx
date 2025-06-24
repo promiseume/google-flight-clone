@@ -1,19 +1,13 @@
-// FlightCardList.tsx
-import React, { useState } from "react";
-import {
-  Card,
-  Accordion,
-  AccordionSummary,
-  Typography,
-  Box,
-  IconButton,
-} from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Card, Accordion, AccordionSummary, IconButton } from "@mui/material";
 import { ExpandMore as ExpandMoreIcon } from "@mui/icons-material";
 import { FlightDetails, type FlightOption } from "./FlightDetails";
+import useSearchFlights, { type FlightParams } from "../hooks/useSearchFlights";
+import { useAppState } from "../contexts/AppStateContext";
 
 interface Props {}
 
-const flights: FlightOption[] = [
+const _flights: FlightOption[] = [
   {
     id: "1",
     airline: "Ethiopian",
@@ -156,6 +150,32 @@ const flights: FlightOption[] = [
 
 export const FlightCardList: React.FC<Props> = () => {
   const [expandedCard, setExpandedCard] = useState<Record<string, boolean>>({});
+  const [params, setParams] = useState<FlightParams>({});
+  const { from, to, startDate } = useAppState();
+  const { data: flights, refetch } = useSearchFlights(params);
+
+  useEffect(() => {
+    console.log(startDate);
+    console.log(from);
+    console.log(to);
+
+    if (from && to && startDate) {
+      setParams({
+        originEntityId: from?.entityId,
+        originSkyId: from?.skyId,
+        destinationEntityId: to?.entityId,
+        destinationSkyId: to?.skyId,
+        date: startDate?.toDateString(),
+        adults: "2",
+        sortBy: "best",
+        currency: "USD",
+        market: "en-US",
+        countryCode: "US",
+      });
+
+      refetch();
+    }
+  }, [from, to, startDate]);
 
   const handleChange =
     (panel: string) => (_: React.SyntheticEvent, isExpanded: boolean) => {
@@ -163,8 +183,24 @@ export const FlightCardList: React.FC<Props> = () => {
     };
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
-      {flights.map((flight, index) => (
+    <div className="p-4 w-full">
+      <div className="flex items-center w-full mb-2 cursor-pointer">
+        <div
+          className={`flex items-center justify-center align-center w-[50%] h-12 border rounded-tl-md rounded-bl-md ${
+            true
+              ? "bg-blue-100 border-blue-600 border-b-2 text- border-b-blue-600"
+              : "border-gray-300"
+          }`}
+        >
+          <p>Best</p>
+        </div>
+        <div
+          className={`flex items-center justify-center align-center w-[50%] h-12 border border-gray-300 border-l-0 rounded-tr-md rounded-br-md`}
+        >
+          <p>Cheapest</p>
+        </div>
+      </div>
+      {_flights.map((flight, index) => (
         <Card
           key={flight.id}
           elevation={0}
@@ -172,10 +208,10 @@ export const FlightCardList: React.FC<Props> = () => {
             ${
               !!expandedCard[flight.id]
                 ? index === 0
-                  ? "mb-4"
-                  : index === flights.length - 1
-                  ? "mt-4"
-                  : "mt-4 mb-4"
+                  ? "mb-1.5"
+                  : index === _flights.length - 1
+                  ? "mt-1.5"
+                  : "mt-1.5 mb-1.5"
                 : ""
             }
             overflow-hidden
@@ -202,62 +238,85 @@ export const FlightCardList: React.FC<Props> = () => {
               }
               aria-controls={`${flight.id}-content`}
               id={`${flight.id}-header`}
-              className="px-4 py-3 flex items-center justify-between"
+              className="px-4 py-2 flex items-center gap-2"
             >
-              <Box className="flex flex-col md:flex-row justify-between items-center w-full">
-                <div className="flex items-center space-x-4 mb-2 md:mb-0">
-                  <div className="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0"></div>
+              {!expandedCard[flight.id] ? (
+                <div className="flex items-center gap-8 w-[40%]">
+                  <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-gray-300">
+                    <img
+                      src="your-image-url.jpg"
+                      alt="avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                   <div>
-                    <Typography variant="body1" className="font-semibold">
-                      {flight.airline}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {flight.departureTime} – {flight.arrivalTime}
-                    </Typography>
+                    <p className="font-semibold text-sm">
+                      {flight.departureTime} - {flight.arrivalTime}
+                    </p>
+                    <p className="font-light text-xs">{flight.airline}</p>
                   </div>
                 </div>
-
-                <div className="text-center mb-2 md:mb-0">
-                  <Typography variant="body1" className="font-semibold">
-                    {flight.duration}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {flight.stops}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    className="text-xs"
-                  >
-                    {flight.layoverInfo}
-                  </Typography>
+              ) : (
+                <div className="flex items-center gap-8 w-[50%]">
+                  <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-gray-300">
+                    <img
+                      src="your-image-url.jpg"
+                      alt="avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">
+                      Departure &middot; {flight.departureTime}
+                    </p>
+                  </div>
                 </div>
+              )}
 
-                <div className="text-center mb-2 md:mb-0">
-                  <Typography variant="body1" className="font-semibold">
-                    {flight.co2Emissions}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    className={`text-sm ${
-                      flight.emissionsChange.startsWith("-")
-                        ? "text-green-600"
-                        : "text-gray-600"
-                    }`}
-                  >
-                    {flight.emissionsChange}
-                  </Typography>
+              {!expandedCard[flight.id] ? (
+                <div className="flex gap-4 w-[40%] justify-between">
+                  <div className="flex flex-col justify-center">
+                    <p className="font-medium text-sm">{flight.duration}</p>
+                    {/* <p className="font-light text-xs">{flight.stops}</p> */}
+                  </div>
+
+                  <div className="flex flex-col justify-center">
+                    <p className="font-medium text-sm">{flight.stops}</p>
+                    <p className="font-light text-xs">{flight.layoverInfo}</p>
+                  </div>
+                  <div className="flex flex-col justify-center">
+                    <p className="font-medium text-sm">{flight.co2Emissions}</p>
+                    <p className="font-medium text-[10px] text-green-900 bg-green-50 p-0.5 rounded-sm">
+                      {flight.emissionsChange}{" "}
+                    </p>
+                  </div>
                 </div>
+              ) : (
+                <div className="flex gap-4 w-[30%] justify-between">
+                  <div className="flex flex-col justify-center">
+                    <p className="font-medium text-sm">{flight.co2Emissions}</p>
+                    <p className="font-medium text-[10px] text-green-900 bg-green-50 p-0.5 rounded-sm">
+                      {flight.emissionsChange}{" "}
+                    </p>
+                  </div>
+                  <div className="flex flex-col justify-center">
+                    <p className="font-light text-sm text-blue-600 border border-gray-200 py-1 px-4 hover:bg-gray-50 rounded-4xl">
+                      Select flight
+                    </p>
+                  </div>
+                </div>
+              )}
 
-                <div className="text-right mr-5">
-                  <Typography variant="h6" className="font-bold">
+              <div className="flex align-right w-[20%] justify-end">
+                <div className="flex flex-col justify-end items-end align-right">
+                  <p className="font-medium text-sm text-green-700">
                     {flight.price}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    round trip
-                  </Typography>
+                  </p>
+                  <p className="font-light text-xs">{"round price"}</p>
                 </div>
-              </Box>
+              </div>
+
+              {/* </Box> */}
             </AccordionSummary>
             <FlightDetails flight={flight} />
           </Accordion>

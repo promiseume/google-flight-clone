@@ -1,13 +1,6 @@
 // FlightCardList.tsx
 import React from "react";
-import {
-  AccordionDetails,
-  Typography,
-  Box,
-  Divider,
-  Button,
-} from "@mui/material";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { AccordionDetails, Typography, Box, Divider } from "@mui/material";
 
 export interface FlightLeg {
   departureTime: string;
@@ -42,20 +35,6 @@ export const FlightDetails: React.FC<{ flight: FlightOption }> = ({
 }) => {
   return (
     <AccordionDetails className="p-4 border-t border-gray-200">
-      <Box className="flex justify-between items-center mb-4">
-        <Typography variant="body2" className="font-semibold text-gray-700">
-          Departure&nbsp;
-          <span className="font-normal">Tue 1 Jul</span>
-        </Typography>
-        <Button
-          variant="contained"
-          size="small"
-          className="bg-blue-600 hover:bg-blue-700 text-white rounded-full normal-case"
-        >
-          Select flight
-        </Button>
-      </Box>
-
       {flight.legs.map((leg, legIndex) => (
         <React.Fragment key={legIndex}>
           <Box className="flex items-start mb-2 space-x-3">
@@ -83,14 +62,6 @@ export const FlightDetails: React.FC<{ flight: FlightOption }> = ({
                       </span>
                     )}
                 </Typography>
-                <Box className="flex items-center text-sm">
-                  <Typography variant="body2" className="text-gray-600 mr-1">
-                    {leg.co2Emissions}
-                  </Typography>
-                  <InfoOutlinedIcon
-                    sx={{ fontSize: 16, color: "text.secondary" }}
-                  />
-                </Box>
               </Box>
               <Typography variant="body2" color="text.secondary">
                 {leg.departureAirport}
@@ -123,16 +94,6 @@ export const FlightDetails: React.FC<{ flight: FlightOption }> = ({
           )}
         </React.Fragment>
       ))}
-
-      <Box className="flex items-center text-sm text-gray-600 mt-4">
-        <Typography variant="body2">Emissions estimate:</Typography>
-        <Typography variant="body2" className="font-semibold ml-1">
-          {flight.co2Emissions}
-        </Typography>
-        <InfoOutlinedIcon
-          sx={{ fontSize: 16, ml: 0.5, color: "text.secondary" }}
-        />
-      </Box>
     </AccordionDetails>
   );
 };

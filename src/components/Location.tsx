@@ -22,12 +22,19 @@ import useSearchAirport, {
   type LocationOption,
 } from "../hooks/useSearchAirpots";
 import debounce from "lodash.debounce";
+import { useAppState } from "../contexts/AppStateContext";
 
 export default function FlightSearchHeader() {
-  const [from, setFrom] = useState<LocationOption | null>(null);
-  const [to, setTo] = useState<LocationOption | null>(null);
-  const [startDate, setStartDate] = useState<Date | null>(new Date());
-  const [endDate, setEndDate] = useState<Date | null>(new Date());
+  const {
+    from,
+    setFrom,
+    to,
+    setTo,
+    startDate,
+    endDate,
+    setEndDate,
+    setStartDate,
+  } = useAppState();
   const [rotated, setRotated] = useState(false);
 
   const swapLocations = () => {
@@ -38,9 +45,9 @@ export default function FlightSearchHeader() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <div className="p-4 max-w-4xl mx-auto mb-4 h-14">
+      <div className="p-4 w-full mb-4 h-14">
         <div className="flex items-center gap-2">
-          <div className="flex items-center w-[50%] h-[100%]">
+          <div className="flex items-center w-[60%] h-full relative">
             <LocationSelector
               value={from}
               onChange={(val) => setFrom(val)}
@@ -49,9 +56,17 @@ export default function FlightSearchHeader() {
 
             <button
               onClick={swapLocations}
-              className={`w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transform transition-transform duration-300 ${
-                rotated ? "rotate-180" : "rotate-0"
-              }`}
+              className={`
+                absolute
+                left-1/2
+                transform -translate-x-1/2
+                w-8 h-8
+                flex items-center justify-center
+                rounded-full bg-gray-100 hover:bg-gray-200
+                transition-transform duration-300
+                z-10
+                ${rotated ? "rotate-180" : "rotate-0"}
+              `}
               title="Swap"
             >
               <SwapHorizIcon fontSize="small" className={`text-gray-600`} />
@@ -63,42 +78,27 @@ export default function FlightSearchHeader() {
             />
           </div>
 
-          <div className="flex items-center w-[50%] h-[100%]">
-            <DatePicker
-              value={startDate}
-              onChange={(newVal) => setStartDate(newVal)}
-              slotProps={{
-                textField: {
-                  size: "small",
-                  className: "min-w-32 h-14 rounded-t-md",
-                  InputProps: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <CalendarMonthIcon fontSize="small" />
-                      </InputAdornment>
-                    ),
+          <div className="flex items-center w-[40%] border border-gray-200 rounded-sm h-full">
+            {[startDate, endDate].map((value, idx) => (
+              <DatePicker
+                key={idx}
+                value={value}
+                onChange={idx === 0 ? setStartDate : setEndDate}
+                slotProps={{
+                  textField: {
+                    variant: "outlined",
+                    className: "h-full",
+                    InputProps: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <CalendarMonthIcon fontSize="small" />
+                        </InputAdornment>
+                      ),
+                    },
                   },
-                },
-              }}
-            />
-            <span className="text-gray-400">—</span>
-            <DatePicker
-              value={endDate}
-              onChange={(newVal) => setEndDate(newVal)}
-              slotProps={{
-                textField: {
-                  size: "small",
-                  className: "min-w-32 h-[100%] rounded-t-md",
-                  InputProps: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <CalendarMonthIcon fontSize="small" />
-                      </InputAdornment>
-                    ),
-                  },
-                },
-              }}
-            />
+                }}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -145,9 +145,10 @@ export function LocationSelector({
         px-4 py-2
         rounded-md w-full h-14
         cursor-text
-        hover:bg-gray-50
+        hover:border-gray-400
         border
         ${open ? "border-blue-600" : "border-gray-300"}
+        ${isStart ? "mr-1" : "ml-1"}
       `}
       >
         {isStart ? (
@@ -172,6 +173,7 @@ export function LocationSelector({
           searchTerm={searchTerm}
           toggleGroup={toggleGroup}
           openGroups={openGroups}
+          defaultInput={value?.actualName || ""}
         />
       </Popover>
     </>
@@ -184,16 +186,23 @@ export const PopoverContent: React.FC<{
   searchTerm: string;
   toggleGroup: (label: string) => void;
   openGroups: Record<string, boolean>;
-}> = ({ openGroups, handleSelect, setSearchTerm, searchTerm, toggleGroup }) => {
-  const { airports: searchAirports } = useSearchAirport();
-  const airports = searchAirports(searchTerm);
+  defaultInput: string;
+}> = ({
+  openGroups,
+  handleSelect,
+  setSearchTerm,
+  searchTerm,
+  toggleGroup,
+  defaultInput,
+}) => {
+  const { airports } = useSearchAirport(searchTerm);
 
-  const [inputValue, setInputValue] = useState<string>("");
+  const [inputValue, setInputValue] = useState<string>(defaultInput || "");
 
   const debouncedSetSearchTerm = useCallback(
     debounce((value: string) => {
       setSearchTerm(value);
-    }, 2000),
+    }, 1000),
     []
   );
 

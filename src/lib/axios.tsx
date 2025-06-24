@@ -8,7 +8,7 @@ export const privateRequest = axios.create({
     "Content-Type": "application/json",
     "Cache-Control": "no-cache",
     Pragma: "no-cache",
-    "x-rapidapi-key": "dfce299a75msh29b57254b31b008p1f6210jsnd50563791028",
+    "x-rapidapi-key": "994d0fa39fmshccc927a0a3f09cep17e145jsn25bf458af6d5",
     "x-rapidapi-host": "sky-scrapper.p.rapidapi.com",
   },
 });

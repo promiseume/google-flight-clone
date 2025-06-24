@@ -38,8 +38,8 @@ export default function FlightHeader() {
   };
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
-      <div className="flex gap-3 mt-6 ml-4">
+    <div className="w-full">
+      <div className="flex gap-1 mt-6 ml-4">
         <DropDownWrapper
           value={tripType}
           setValue={handleTripTypeChange}
@@ -154,7 +154,7 @@ const PassengerDropdown = () => {
 
   const handleOpen = () => {
     setTempPassengers(committedPassengers); // reset temp to current values
-    setIsOpen(true);
+    setIsOpen((prev) => !prev);
   };
 
   const handleDone = () => {
@@ -189,7 +189,7 @@ const PassengerDropdown = () => {
   }, [isOpen]);
 
   return (
-    <div className="relative inline-block" ref={containerRef}>
+    <div className="relative inline-block z-20" ref={containerRef}>
       <button
         onClick={handleOpen}
         className={`flex items-center gap-1 px-3 py-1 rounded-t-md h-10 ${
